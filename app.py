@@ -329,3 +329,4 @@ def sendcontact():
     return redirect(url_for("contact"))
 if __name__ == "__main__":
     app.run(debug=True)
+#code will run Now
