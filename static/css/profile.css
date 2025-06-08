@@ -1,0 +1,36 @@
+.profile-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 30px;
+  width: 100%;
+}
+
+.profile-header {
+  font-size: 1.2rem;
+  font-weight: bold;
+  background-color: #f8eeee;
+  padding: 12px 30px;
+  border-radius: 25px;
+  margin-bottom: 20px;
+}
+
+.profile-table {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.profile-table td {
+  padding: 14px 20px;
+  border: 1px solid #e0e0e0;
+  font-size: 1rem;
+  background-color: #fff;
+}
+
+.profile-table tr td:first-child {
+  background-color: #f0f0f0;
+  font-weight: bold;
+  width: 50%;
+}

@@ -1,0 +1,55 @@
+<div class="update-event-wrapper">
+  <button class="update-btn-header">Update Details</button>
+
+  <div class="update-table">
+    <form action="/update" method="post">
+    <table>
+      <thead>
+        <tr>
+          <th>Details</th>
+          <th>Previous</th>
+          <th>To update</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Event Type</td>
+          <td>{{ et }}</td>
+          <td><input type="text" name="eventtype" /></td>
+        </tr>
+        <tr>
+          <td>Event Date</td>
+          <td>{{ ed }}</td>
+          <td><input type="date" name="eventdate" /></td>
+        </tr>
+        <tr>
+          <td>Event Size</td>
+          <td>{{ es }}</td>
+          <td><input type="number" name="eventsize" /></td>
+        </tr>
+        <tr>
+          <td>Location</td>
+          <td>{{ loc }}</td>
+          <td><input type="text" name="location" /></td>
+        </tr>
+        <tr>
+          <td>SubEvents</td>
+          <td>{{ se }}</td>
+          <td><input type="text" name="subevents" /></td>
+        </tr>
+        <tr>
+          <td>Eligibility</td>
+          <td>{{ el }}</td>
+          <td><input type="text" name="eligibity" /></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="update-button-wrapper">
+    <button class="update-btn">Update</button>
+  </div>
+    </form>
+    
+  </div>
+
+  
+</div>

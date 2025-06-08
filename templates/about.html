@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About Us - GRIET Events</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/about.css') }}">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="GRIET Logo" class="logo">
+      <div class="title-text">
+        <h1 class="college-name">GOKARAJU RANGARAJU</h1>
+        <h2 class="sub-title">Institute of Engineering and Technology</h2>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <h2>About Us</h2>
+      <p>
+        GRIET Events is an innovative web-based platform designed to streamline and simplify event management within GRIET.
+        Built using Flask and MongoDB, this platform allows students and organizers to register, log in securely, and manage events with ease.
+        With a stylish, glassmorphic UI and responsive design, users can submit essential event details like name, type, date, size, sub-events, and eligibility.
+        Once logged in, users access a personalized dashboard displaying key event statistics and data-driven insights.
+        Whether it's a technical symposium or a cultural fest, GRIET Events centralizes all information under one roof.
+        Flash messages provide real-time feedback, ensuring a smooth user experience, while the announcement board keeps everyone updated.
+        Designed to be both functional and visually engaging, GRIET Events is not just a portal—it's the future of college event coordination.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

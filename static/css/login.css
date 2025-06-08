@@ -1,0 +1,127 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, #fdf6f6, #faf2f2);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 25px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 50px;
+    width: 650px;
+  }
+  
+  .left-section {
+    text-align: center;
+  }
+  
+  .left-section img {
+    width: 200px;
+  }
+  
+  .left-section h1 {
+    color: #a00000;
+    font-size: 30px;
+    margin-top: 20px;
+  }
+  
+  .right-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+  }
+  
+  .glass-input {
+    width: 300px;
+    padding: 15px;
+    border-radius: 20px;
+    border: none;
+    background-color: #e8e6e6;
+    font-size: 16px;
+    color: #fff;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+  
+  .glass-input::placeholder {
+    color: black;
+    opacity: 0.8;
+  }
+  
+  .glass-input:focus {
+    outline: none;
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(160, 0, 0, 0.3);
+  }
+  
+  .glass-button {
+    background-color: #a00000;
+    color: white;
+    width: 290px;
+    border: none;
+    border-radius: 15px;
+    padding: 15px 40px;
+    font-size: 16px;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+  }
+  
+  .glass-button:hover {
+    transform: scale(1.05);
+  }
+  
+  .back-link {
+    margin-top: 10px;
+    font-size: 16px;
+    color: #a00000;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+  }
+  
+  .back-link:hover {
+    transform: scale(1.05);
+    text-decoration: underline;
+  }
+  .flash-container {
+  position: absolute;
+  top: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  z-index: 999;
+}
+
+.flash-message {
+  background: rgba(255, 255, 255, 0.7);
+  color: #a00000;
+  padding: 15px 25px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(160, 0, 0, 0.3);
+  font-weight: bold;
+  max-width: 600px;
+  text-align: center;
+  backdrop-filter: blur(5px);
+  border-left: 6px solid #a00000;
+}
+
+@media (max-width: 768px) {
+  .flash-message {
+    max-width: 90%;
+    font-size: 14px;
+    padding: 10px 15px;
+  }
+}

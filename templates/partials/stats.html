@@ -1,0 +1,73 @@
+<div class="stats-container">
+  <h2>Stats</h2>
+  <div class="chart-section">
+    <canvas id="registrationChart"></canvas>
+    <canvas id="amountChart"></canvas>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  async function loadStats() {
+    const response = await fetch("/api/stats-data");
+    const data = await response.json();
+
+    const labels = data.dates;
+
+    new Chart(document.getElementById("registrationChart"), {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "No. of Registrations",
+          data: data.registrations,
+          backgroundColor: "#03a9f4"
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        title: { display: true, text: "Registrations in Last 7 Days" }
+      }
+    });
+
+    new Chart(document.getElementById("amountChart"), {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Amount Collected",
+          data: data.amounts,
+          backgroundColor: "#0288d1"
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        title: { display: true, text: "Amount Collected in Last 7 Days" }
+      }
+    });
+  }
+
+  loadStats();
+</script>
+
+<style>
+.stats-container {
+  padding: 20px;
+  background: #fff;
+  border-radius: 20px;
+  text-align: center;
+}
+
+.chart-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+canvas {
+  width: 400px !important;
+  height: 300px !important;
+}
+</style>

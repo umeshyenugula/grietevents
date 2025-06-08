@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GRIET Events</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/addparticipant.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/seeparticipant.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/updateevent.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/seetransactions.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/verification.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+  <style>
+    .nav-links a.active {
+      background-color: #b30000;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <header class="main-header">
+    <div class="header-content">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="GRIET Logo" />
+      <h1>Griet Events</h1>
+    </div>
+  </header>
+
+  <div class="main-container">
+    <aside class="sidebar">
+      <nav class="nav-links">
+        <a href="/dashboard-info" data-page="/dashboard-info">Dashboard</a>
+        <a href="/announcement" data-page="/announcement">Announcements</a>
+        <a href="/add-participant" data-page="/add-participant">Add Participant</a>
+        <a href="/see-participants" data-page="/see-participants">See Participants</a>
+        <a href="/update-event" data-page="/update-event">Update Event Details</a>
+        <a href="/transactions" data-page="/transactions">See Transactions</a>
+        <a href="/stats" data-page="/stats">See Stats</a>
+        <a href="/verify" data-page="/verify">Verify Participant</a>
+         <a href="/profile" data-page="/profile">Profile</a>
+      </nav>
+      <div class="profile-section">
+        <a href="/logout" class="logout">Logout</a>
+      </div>
+    </aside>
+    
+    <main class="content" id="main-content">
+      {% include "partials/dashboard_info.html" %}
+    </main>
+  </div>
+
+  <script>
+  const navLinks = document.querySelectorAll('.nav-links a');
+  const mainContent = document.getElementById('main-content');
+
+  navLinks.forEach(link => {
+    link.addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      navLinks.forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+
+      const page = link.getAttribute('data-page');
+      try {
+        const response = await fetch(page);
+        if (!response.ok) throw new Error("Failed to load page.");
+        const html = await response.text();
+        mainContent.innerHTML = html;
+
+        if (page === "/see-participants") {
+  loadParticipants();
+} else if (page === "/transactions") {
+  loadTransactions(); 
+} else if (page === "/stats") {
+  setTimeout(() => {
+    if (typeof loadStatsCharts === "function") {
+      loadStatsCharts();
+    } else {
+      console.error("loadStatsCharts not defined.");
+    }
+  }, 100);
+} else if (page === "/verify") {
+  setTimeout(() => {
+    const verifyBtn = document.getElementById("verifyBtn");
+    if (!verifyBtn) return;
+
+    verifyBtn.addEventListener("click", function () {
+      const verificationNumber = document.getElementById("verificationInput").value.trim();
+      if (!verificationNumber) return;
+
+      fetch(`/api/verify?code=${verificationNumber}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            alert("Participant not found.");
+            return;
+          }
+
+          document.getElementById("participantDetails").style.display = "block";
+          document.getElementById("pName").textContent = data.name;
+          document.getElementById("pBranch").textContent = data.branch;
+          document.getElementById("pRoll").textContent = data.roll_no;
+          document.getElementById("pEvent").textContent = data.event;
+          document.getElementById("pDate").textContent = data.date;
+          document.getElementById("pTeamSize").textContent = data.teamsize;
+          document.getElementById("pAmount").textContent = `₹${data.amount_paid}`;
+        })
+        .catch(() => {
+          alert("Error fetching participant data.");
+        });
+    });
+  }, 100);
+}
+
+
+      } catch (err) {
+        mainContent.innerHTML = "<p>Error loading content.</p>";
+      }
+    });
+  });
+
+  async function loadParticipants() {
+    try {
+      const res = await fetch("/api/seeparticipants");
+      const data = await res.json();
+
+      const tableBody = document.querySelector("#participants-table tbody");
+      tableBody.innerHTML = "";
+
+      data.forEach(p => {
+        const row = `<tr>
+          <td>${p.name}</td>
+          <td>${p.roll_no}</td>
+          <td>${p.branch}</td>
+          <td>${p.email}</td>
+          <td>${p.sub_event}</td>
+          <td>${p.team_size}</td>
+          <td>${p.amount_paid}</td>
+          <td>${p.contact}</td>
+        </tr>`;
+        tableBody.innerHTML += row;
+      });
+    } catch (err) {
+      console.error("Error loading participants:", err);
+    }
+  }
+ async function loadTransactions() {
+  try {
+    const res = await fetch("/transactions-data");
+    const data = await res.json();
+    const tableBody = document.querySelector("#transactions-table tbody");
+    const totalAmountDiv = document.getElementById("total-amount");
+    tableBody.innerHTML = "";
+    data.participants.forEach(t => {
+      const row = `<tr>
+        <td>${t.name}</td>
+        <td>${t.roll_no}</td>
+        <td>${t.subevent}</td>
+        <td>${t.teamsize}</td>
+        <td>${t.verification_number}</td>
+        <td>${t.amount}</td>
+      </tr>`;
+      tableBody.innerHTML += row;
+    });
+
+    totalAmountDiv.textContent = `Total Amount Collected: ₹${data.total_amount}`;
+  } catch (err) {
+    console.error("Error loading transactions:", err);
+  }
+}
+document.addEventListener("click", function (e) {
+  if (e.target && e.target.id === "verifyBtn") {
+    const verificationNumber = document.getElementById("verificationInput").value.trim();
+    if (!verificationNumber) return;
+
+    fetch(`/api/verify?code=${verificationNumber}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          alert("Participant not found.");
+          return;
+        }
+
+        document.getElementById("participantDetails").style.display = "block";
+        document.getElementById("pName").textContent = data.name;
+        document.getElementById("pBranch").textContent = data.branch;
+        document.getElementById("pRoll").textContent = data.roll_no;
+        document.getElementById("pEvent").textContent = data.event;
+        document.getElementById("pDate").textContent = data.date;
+        document.getElementById("pTeamSize").textContent = data.teamsize;
+        document.getElementById("pAmount").textContent = `₹${data.amount_paid}`;
+      })
+      .catch(() => {
+        alert("Error fetching participant data.");
+      });
+  }
+});
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/stats.js') }}"></script>
+
+</body>
+</html>

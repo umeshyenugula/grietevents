@@ -1,0 +1,62 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, #fdf6f6, #faf2f2);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 25px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 50px;
+    width: 800px;
+  }
+  
+  .left-section {
+    text-align: center;
+  }
+  
+  .left-section img {
+    width: 200px;
+  }
+  
+  .left-section h1 {
+    color: #a00000;
+    font-size: 30px;
+    margin: 20px 0 0;
+  }
+  
+  .right-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .glass-button {
+    background-color: #a00000;
+    width: 340px;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 15px 40px;
+    font-size: 16px;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+  }
+  
+  .glass-button:hover {
+    transform: scale(1.05);
+  }
+  

@@ -1,0 +1,116 @@
+.participants-overview-wrapper {
+  margin: 20px auto;
+  padding: 20px;
+  max-width: 1100px;
+  background-color: #fff;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  font-family: Arial, sans-serif;
+}
+
+.participants-overview-wrapper h2 {
+  background-color: #a80000;
+  color: white;
+  padding: 15px;
+  border-radius: 15px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.participants-overview-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 30px;
+}
+
+.participants-overview-wrapper th,
+.participants-overview-wrapper td {
+  padding: 12px;
+  text-align: center;
+  border: 1px solid #ccc;
+  background-color: #fdfdfd;
+}
+
+.participants-overview-wrapper th {
+  background-color: #eee;
+  font-weight: bold;
+}
+
+.participants-footer {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.participants-footer .note {
+  color: #a80000;
+  font-size: 0.95rem;
+  margin-bottom: 15px;
+}
+
+.participants-footer .submit-btn {
+  background-color: #a80000;
+  color: white;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.participants-footer .submit-btn:hover {
+  background-color: #880000;
+  transform: scale(1.05);
+}
+.section-title {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #b30000;
+  font-weight: bold;
+}
+
+.table-container {
+  max-width: 95%;
+  margin: auto;
+  overflow-x: auto;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#participants-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+#participants-table thead {
+  background-color: #b30000;
+  color: white;
+}
+
+#participants-table th,
+#participants-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #ddd;
+}
+
+#participants-table tbody tr:hover {
+  background-color: rgba(179, 0, 0, 0.05);
+}
+
+@media (max-width: 768px) {
+  #participants-table {
+    font-size: 0.85rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+}

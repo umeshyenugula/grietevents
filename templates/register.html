@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GRIET Events Registration</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
+</head>
+<body>
+  <div class="container">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqTkkG-9c2jad8zMOjRkn8o8qZ-L9nnRC5JA&s" alt="GRIET Logo" class="logo">
+    <h1>Griet Events Registration</h1>
+    <form method="POST" action="/register">
+      <div class="input-row">
+        <input type="text" name="name" placeholder="Name" required>
+        <input type="text" name="eventname" placeholder="Event name" required>
+      </div>
+      <div class="input-row">
+        <input type="text" name="eventtype" placeholder="Event type eg:Technical" required>
+        <input type="date" name="eventdate" placeholder="Eventdate" required>
+      </div>
+      <div class="input-row">
+        <input type="number" name="eventsize" placeholder="Event size Eg :- 100" required>
+        <input type="text" name="location" placeholder="location" required>
+      </div>
+      <div class="input-row">
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="password" name="password" placeholder="Password" required>
+      </div>
+      <div class="input-row">
+        <input type="email" name="email" placeholder="Email Address" required>
+        <input type="text" name="subevents" placeholder="Sub-events">
+      </div>
+      <div class="input-row">
+        <input type="text" name="eligibity" placeholder="Eligibility Eg:- Only First Year" required>
+        <div></div>
+      </div>
+      <p>By Clicking Your Agree to our </p>
+      <a href="/t&c">Terms and Conditions</a>
+      <button type="submit">Register</button>
+    </form>
+    <a href="/login">Back to Login</a>
+  </div>
+</body>
+</html>
