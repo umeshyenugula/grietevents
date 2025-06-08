@@ -10,7 +10,7 @@ load_dotenv()
 mongo_uri = os.getenv("MONGO_URI")
 app = Flask(__name__)
 app.secret_key = 'ABCDEFGHIJKLMNOP'
-client = MongoClient(mongo_uri)
+client = MongoClient(os.getenv("MONGO_URI"), tls=True)
 db = client["grietevents"]
 users = db["users"]
 announcements_collection = db["announcements"]
