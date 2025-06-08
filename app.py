@@ -6,9 +6,11 @@ from datetime import datetime, timedelta
 from pymongo import ReturnDocument 
 from dotenv import load_dotenv
 import os
+load_dotenv()  
+mongo_uri = os.getenv("MONGO_URI")
 app = Flask(__name__)
 app.secret_key = 'ABCDEFGHIJKLMNOP'
-client = MongoClient("mongodb+srv://grietevents:Umesh%400531@logindata.fugvbow.mongodb.net/grietevents")
+client = MongoClient(mongo_uri)
 db = client["grietevents"]
 users = db["users"]
 announcements_collection = db["announcements"]
