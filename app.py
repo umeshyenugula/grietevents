@@ -1,5 +1,4 @@
 from flask import Flask, render_template, session, request, jsonify, url_for, flash, redirect
-import qrcode
 from pymongo import MongoClient
 from contactformsender import send_html_email
 from contactsender import send_html_email_contact
@@ -7,11 +6,9 @@ from datetime import datetime, timedelta
 from pymongo import ReturnDocument 
 from dotenv import load_dotenv
 import os
-load_dotenv()  
-mongo_uri = os.getenv("MONGO_URI")
 app = Flask(__name__)
 app.secret_key = 'ABCDEFGHIJKLMNOP'
-client = MongoClient(mongo_uri)
+client = MongoClient("mongodb+srv://grietevents:Umesh%400531@logindata.fugvbow.mongodb.net/")
 db = client["grietevents"]
 users = db["users"]
 announcements_collection = db["announcements"]
