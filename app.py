@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 import os
 app = Flask(__name__)
 app.secret_key = 'ABCDEFGHIJKLMNOP'
-client = MongoClient("mongodb+srv://grietevents:Umesh%400531@logindata.fugvbow.mongodb.net/")
+client = MongoClient("mongodb+srv://grietevents:Umesh%400531@logindata.fugvbow.mongodb.net/grietevents")
 db = client["grietevents"]
 users = db["users"]
 announcements_collection = db["announcements"]
