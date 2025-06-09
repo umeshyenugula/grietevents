@@ -23,8 +23,15 @@ def home():
 @app.route("/announcements")
 def get_announcements():
     try:
-        announcements = announcements_collection.find()
-        output = [{"message": a["message"], "date": a.get("date", "") ,"eventname":a.get("eventname","None")} for a in announcements]
+        announcements = announcements_collection.find().sort("date", -1) 
+        output = [
+            {
+                "message": a["message"],
+                "date": a.get("date", ""),
+                "eventname": a.get("eventname", "None")
+            } 
+            for a in announcements
+        ]
         return jsonify(output)
     except Exception as e:
         return jsonify({"error": str(e)})
@@ -46,6 +53,96 @@ def login():
             flash("Username does not exist.")
         return redirect(url_for("login"))
     return render_template("login.html")
+from flask import render_template, request, redirect, session, flash, url_for
+from datetime import datetime, timedelta
+
+@app.route("/recovery", methods=['GET', 'POST'])
+def recovery():
+    if request.method == 'POST':
+        username = request.form.get("username", "").strip()
+        email = request.form.get("email", "").strip()
+
+        if username:
+            recvar = username
+        elif email:
+            recvar = email
+        else:
+            flash("Enter at least one field for password recovery", "error")
+            return render_template("recovery.html")
+        query = {"email": recvar} if "@" in recvar else {"username": recvar}
+        user = users.find_one(query)
+
+        if user:
+            otp = send_otp(user['email'], user['eventname'], user['name'], "recotp.html")
+            session['otprec'] = otp
+            session['recvar'] = recvar
+            session.pop("last_resend_time", None) 
+            return render_template("recoveryotppage.html")
+        else:
+            flash("Account not found. Please check for any typo mistakes", "error")
+            return render_template("recovery.html")
+    return render_template("recovery.html")
+@app.route("/recresend", methods=['GET'])
+def recresend():
+    recvar = session.get("recvar")
+    if not recvar:
+        flash("Session expired. Please register a request again.", "error")
+        return redirect(url_for('recovery'))
+    now = datetime.now()
+    last_resend = session.get("last_resend_time")
+    if last_resend:
+        last_time = datetime.strptime(last_resend, "%Y-%m-%d %H:%M:%S")
+        if now - last_time < timedelta(minutes=2):
+            wait_seconds = 120 - int((now - last_time).total_seconds())
+            flash(f"Please wait {wait_seconds} seconds before resending OTP.", "warning")
+            return render_template("recoveryotppage.html")
+
+    query = {"email": recvar} if "@" in recvar else {"username": recvar}
+    user = users.find_one(query)
+    if user:
+        otp = send_otp(user['email'], user['eventname'], user['name'], "recotp.html")
+        session["otprec"] = otp
+        session["last_resend_time"] = now.strftime("%Y-%m-%d %H:%M:%S")
+        flash("OTP has been resent successfully.", "success")
+    else:
+        flash("User not found. Please try recovery again.", "error")
+        return redirect(url_for('recovery'))
+    return render_template("recoveryotppage.html")
+@app.route('/reverify', methods=['POST'])
+def verify_recovery():
+    entered_otp = request.form.get("otp")
+    session_otp = session.get("otprec")
+    recvar = session.get("recvar")
+    if not (entered_otp and session_otp and recvar):
+        flash("Session expired or invalid access.", "error")
+        return redirect(url_for('recovery'))
+    if entered_otp == session_otp:
+        return render_template("reset_password.html")
+    else:
+        flash("Invalid OTP. Please try again.", "error")
+        return render_template("recoveryotppage.html")
+@app.route("/reset-password", methods=['POST'])
+def reset_password():
+    new_password = request.form.get("new_password")
+    confirm_password = request.form.get("confirm_password")
+    recvar = session.get("recvar")
+    if not recvar:
+        flash("Session expired. Please start recovery again.", "error")
+        return redirect(url_for('recovery'))
+    if (new_password != confirm_password):
+        flash("Passwords do not match. Please try again.", "error")
+        return render_template("reset_password.html")
+    query = {"email": recvar} if "@" in recvar else {"username": recvar}
+    update = {"$set": {"password": new_password}}
+    result = users.update_one(query, update)
+    if result.modified_count == 1:
+        flash("Password updated successfully. Please login.", "success")
+        session.pop("recvar", None)
+        session.pop("otprec", None)
+        return redirect(url_for('login'))
+    else:
+        flash("Password reset failed. Please try again.", "error")
+        return render_template("reset_password.html")
 @app.route("/register", methods=['POST', 'GET'])
 def register():
     if request.method == 'POST':
@@ -67,7 +164,7 @@ def register():
         user = users.find_one({'username': data['username']})
         if(user):
             return jsonify({"status": "error", "message": "Username already exists."})
-        otp = send_otp(data['email'], data['eventname'], data['name'])
+        otp = send_otp(data['email'], data['eventname'], data['name'],"otpverify.html")
         session['formdata'] = data
         session['otp'] = otp
         otp_html = render_template("otp.html")
@@ -100,7 +197,7 @@ def resend():
     email = formdata.get("email")
     eventname = formdata.get("eventname")
     name = formdata.get("name")
-    otp = send_otp(email, eventname, name)
+    otp = send_otp(email, eventname, name,'otpverify.html')
     session["otp"] = otp
     session["last_resend_time"] = now.strftime("%Y-%m-%d %H:%M:%S")
     flash("OTP has been resent successfully.")
