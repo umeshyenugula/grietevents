@@ -40,7 +40,7 @@ def send_otp(email,eventname, name):
     })
     service = gmail_authenticate()
     message = MIMEText(html_content, 'html')
-    message['to'] = "umeshyenugula2007@gmail.com"
+    message['to'] = email
     message['from'] = "me"
     message['subject'] = "Your OTP for Verification"
     raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
