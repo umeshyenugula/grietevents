@@ -1,5 +1,4 @@
 from flask import Flask, render_template, session, request, jsonify, url_for, flash, redirect
-import qrcode
 from pymongo import MongoClient
 from contactformsender import send_html_email
 from contactsender import send_html_email_contact
