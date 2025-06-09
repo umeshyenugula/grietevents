@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Public Student Pass Verification</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f6fa;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+    }
+
+    .header img {
+      width: 80px;
+    }
+
+    .title-bar {
+      background-color: #a80000;
+      color: white;
+      padding: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 20px;
+      margin: 20px 0;
+    }
+
+    input[type="text"] {
+      padding: 12px 25px;
+      font-size: 16px;
+      border-radius: 25px;
+      border: 1px solid #ccc;
+      width: 250px;
+      margin: 20px 0;
+    }
+
+    .btn {
+      background-color: #a80000;
+      color: white;
+      border: none;
+      padding: 10px 30px;
+      border-radius: 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #880000;
+    }
+
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 30px;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f0f0f0;
+      width: 40%;
+    }
+
+    td {
+      background-color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqTkkG-9c2jad8zMOjRkn8o8qZ-L9nnRC5JA&s" alt="GRIET Logo" />
+      <h2 style="color:#a80000;">GOKARAJU RANGARAJU</h2>
+      <p>Institute of Engineering and Technology</p>
+    </div>
+    <div class="title-bar">Public Student Pass Verification</div>
+    <form method="POST" action="/pverify">
+      <input type="text" name="verification_number" placeholder="Enter Verification Number" required />
+      <br>
+      <button class="btn" type="submit">Submit</button>
+    </form>
+    {% if error %}
+      <div class="error">{{ error }}</div>
+    {% endif %}
+    {% if student %}
+    <table>
+      <tr><th>Name Of The Student</th><td>{{ name }}</td></tr>
+      <tr><th>Branch</th><td>{{ branch }}</td></tr>
+      <tr><th>Roll No</th><td>{{ roll }}</td></tr>
+      <tr><th>Event</th><td>{{ event }}</td></tr>
+      <tr><th>Registered Date</th><td>{{ date }}</td></tr>
+      <tr><th>Team Size</th><td>{{ teamsize }}</td></tr>
+      <tr><th>Amount Paid</th><td>{{ amount }}</td></tr>
+    </table>
+    {% endif %}
+  </div>
+</body>
+</html>
