@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GRIET Events - OTP Verification</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f6fa;
+      margin: 0;
+      padding: 0;
+    }
+    .email-container {
+      max-width: 400px;
+      margin: 20px auto;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    .header {
+      text-align: center;
+    }
+    .header img {
+      width: 80px;
+      margin-bottom: 10px;
+    }
+    .header h1 {
+      color: #d21f3c;
+      font-size: 20px;
+      margin: 0;
+    }
+    .header h2 {
+      color: #555;
+      font-size: 14px;
+      font-weight: normal;
+      margin: 5px 0 15px;
+    }
+    .event-title {
+      background-color: #a80000;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    .content {
+      font-size: 14px;
+      color: #333;
+      line-height: 1.6;
+    }
+    .otp-box {
+      margin: 20px auto;
+      background-color: #d46b6b;
+      color: white;
+      text-align: center;
+      font-size: 20px;
+      padding: 15px 25px;
+      border-radius: 15px;
+      font-weight: bold;
+      font-family: 'Courier New', Courier, monospace;
+      user-select: text;
+      white-space: nowrap;
+      width: fit-content;
+    }
+    .footer {
+      background-color: #f6d4a4;
+      color: #b30000;
+      text-align: center;
+      padding: 10px;
+      font-size: 12px;
+      margin-top: 20px;
+      border-radius: 0 0 10px 10px;
+    }
+    .footer p {
+      margin: 4px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqTkkG-9c2jad8zMOjRkn8o8qZ-L9nnRC5JA&s" alt="GRIET Logo">
+      <h1>GOKARAJU RANGARAJU</h1>
+      <h2>Institute of Engineering and Technology</h2>
+    </div>
+    <div class="event-title">Griet Events</div>
+    <div class="content">
+      Dear {{name}},<br>
+      Your request for password change for account  against the event: <strong>{{eventname}}</strong>.<br>
+      Please complete your recovery process by processing the  <strong>One Time Password (OTP)</strong> on the verification page.<br>
+      <br>
+      Your OTP is:<br>
+    </div>
+    <div class="otp-box">{{num}}</div>
+    <div class="footer">
+      <p>Computer Generated Email , any Mistakes Should be reported only in contact section</p>
+      <a href="https://grietevents.onrender.com/contact">Contact Us</a>
+      <p>Email was sent to {{email}}, Because they requested for Password Change in Griet Events</p>
+      <p>Regards</p>
+      <p>Griet Events</p>
+    </div>
+  </div>
+</body>
+</html>
