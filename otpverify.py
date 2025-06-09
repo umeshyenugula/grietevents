@@ -31,8 +31,8 @@ def render_template(template_file, context):
     env = Environment(loader=FileSystemLoader('templates'))
     template = env.get_template(template_file)
     return template.render(context)
-def send_otp(email,eventname, name):
-    html_content = render_template('otpverify.html', {
+def send_otp(email,eventname, name,file):
+    html_content = render_template(file, {
     'name': name,
     'email': email,
     'num': num,
