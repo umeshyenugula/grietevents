@@ -1,4 +1,5 @@
 from flask import Flask, render_template, session, request, jsonify, url_for, flash, redirect
+import qrcode
 from pymongo import MongoClient
 from contactformsender import send_html_email
 from contactsender import send_html_email_contact
@@ -6,11 +7,14 @@ from datetime import datetime, timedelta
 from pymongo import ReturnDocument 
 from dotenv import load_dotenv
 import os
+import secrets
+from otpverify import send_otp
 load_dotenv()  
 mongo_uri = os.getenv("MONGO_URI")
 app = Flask(__name__)
-app.secret_key = 'ABCDEFGHIJKLMNOP'
-client = MongoClient(os.getenv("MONGO_URI"), tls=True)
+secret_key = secrets.token_hex(32)  
+app.secret_key = secret_key
+client = MongoClient(mongo_uri)
 db = client["grietevents"]
 users = db["users"]
 announcements_collection = db["announcements"]
@@ -46,6 +50,8 @@ def login():
 @app.route("/register", methods=['POST', 'GET'])
 def register():
     if request.method == 'POST':
+        if 'formdata' in session and 'otp' in session:
+            return render_template("otp.html")
         data = {
             'name': request.form.get("name"),
             'username': request.form.get("username"),
@@ -59,9 +65,47 @@ def register():
             'eventsize': request.form.get("eventsize"),
             'location': request.form.get("location")
         }
-        users.insert_one(data)
-        return redirect(url_for("login"))
+        user = users.find_one({'username': data['username']})
+        if(user):
+            return jsonify({"status": "error", "message": "Username already exists."})
+        otp = send_otp(data['email'], data['eventname'], data['name'])
+        session['formdata'] = data
+        session['otp'] = otp
+        otp_html = render_template("otp.html")
+        return jsonify({"status": "success", "html": otp_html})
     return render_template("register.html")
+@app.route("/verify-otp",methods=['POST'])
+def otpverfication():
+    rotp=request.form.get("otp")
+    if(rotp==session['otp']):
+        users.insert_one(session['formdata'])
+        session.pop("formdata",None)
+        session.pop("otp",None)
+        return redirect(url_for("login"))
+    flash("Incorrect OTP")
+    return render_template("otp.html")
+@app.route("/resend", methods=["GET"])
+def resend():
+    formdata = session.get("formdata")
+    if not formdata:
+        flash("Session expired. Please register again.")
+        return redirect(url_for('register'))
+    now = datetime.now()
+    last_resend = session.get("last_resend_time")
+    if last_resend:
+        last_time = datetime.strptime(last_resend, "%Y-%m-%d %H:%M:%S")
+        if now - last_time < timedelta(minutes=2):
+            wait_seconds = 120 - int((now - last_time).total_seconds())
+            flash(f"Please wait {wait_seconds} seconds before resending OTP.")
+            return render_template("otp.html")
+    email = formdata.get("email")
+    eventname = formdata.get("eventname")
+    name = formdata.get("name")
+    otp = send_otp(email, eventname, name)
+    session["otp"] = otp
+    session["last_resend_time"] = now.strftime("%Y-%m-%d %H:%M:%S")
+    flash("OTP has been resent successfully.")
+    return render_template("otp.html")
 @app.route("/t&c")
 def tandc():
     return render_template("t&c.html")
@@ -134,8 +178,6 @@ def sendapplicant():
             'amount': request.form.get("amount"),
             'contact': request.form.get("contact"),
             'date': datetime.now()
-
-
          }
          username = session['username']
          user = users.find_one({'username': username})
@@ -308,6 +350,35 @@ def profile():
                            event=user['eventname'],
                            date=user['eventdate'],
                            subevents=user['subevents'])
+@app.route("/pverify",methods=['GET','POST'])
+def pverify():
+    if request.method=='POST':
+        vnum=request.form.get("verification_number",None)
+        if(vnum):
+            if "-" in vnum:
+                code,num=vnum.split("-")
+                eventname=code[5:]
+                print(eventname)
+                eventb=db[eventname]
+                student=eventb.find_one({'Verification':vnum})
+                if student:
+                    return render_template("public-student-pass-verification.html", 
+                                       student=student,
+                                       name=student['name'],
+                                       branch=student['branch'],
+                                       event=eventname+student['subevents'],
+                                       date=student['date'],
+                                       roll=student['RollNo'],
+                                       teamsize=student['teamsize'],
+                                       amount=student['amount'])
+                else:
+                    return render_template("public-student-pass-verification.html",
+                                        error="Invalid Verification Number")
+            else:
+                return render_template("public-student-pass-verification.html",
+                        error="Please enter Verification Number/valid verification number")
+    else:
+        return render_template("public-student-pass-verification.html")
 @app.route("/logout")
 def logout():
     session.pop("username", None)
@@ -329,4 +400,3 @@ def sendcontact():
     return redirect(url_for("contact"))
 if __name__ == "__main__":
     app.run(debug=True)
-#code will run Now
