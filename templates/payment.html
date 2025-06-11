@@ -117,7 +117,7 @@
         <input type="text" name="transaction" id="transaction" required>
       </div>
       <div class="image">
-        <img src="{{ image_url or 'https://via.placeholder.com/200x150.png?text=Payment+Proof' }}" alt="QR or Payment">
+        <img src="{{ url_for('generate_qrcode', data='some-data') }}" alt="QR Code">
       </div>
     </div>
 
