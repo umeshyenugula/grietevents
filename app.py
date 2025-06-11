@@ -95,9 +95,11 @@ def payment():
             if(subevent==formdata['subevents']):
                 price=amount
                 session['amount']=price
+        data=f'upi://pay?pa={upi}&mode=028&mc=0000&am={price}'
+        session['qrdata']=data
         return render_template("payment.html",
                                 amount=price, 
-                               image_url=url_for('generate_qr', data=f'upi://pay?pa={upi}&mode=028&mc=0000&am={price}'))
+                               image_url=url_for('generate_qr'))
     else:
         return "Organizer is Not Opened for Self Registration Contact Organizer For More details"
 def sanitize_for_mongo(data):
@@ -124,8 +126,9 @@ def submit_payment():
         flash("Payment Submitted Successfully!Details Sent to Organizer for Approval,  Once Approved Your will receive confirmation mail ")
         return redirect(url_for('home'))
     return "Error: No Transaction Number Entered"
-@app.route("/qr/<path:data>")
-def generate_qr(data):
+@app.route("/generate-qr")
+def generate_qr():
+    data=session['qrdata']
     img = qrcode.make(data)
     buf = BytesIO()
     img.save(buf, format="PNG")
