@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Registration - GRIET</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f6eff1;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      flex-wrap: wrap;
+      text-align: center;
+    }
+
+    .header img {
+      height: 60px;
+      margin-right: 20px;
+    }
+
+    .header h1 {
+      color: #a60000;
+      font-size: 24px;
+    }
+
+    .header span {
+      font-size: 16px;
+    }
+
+    .form-container {
+      background: white;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+      margin-top: 10px;
+      width: 90%;
+      max-width: 600px;
+    }
+
+    .form-title {
+      background-color: #a60000;
+      color: white;
+      padding: 10px;
+      border-radius: 20px;
+      text-align: center;
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+
+    .form-row {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      gap: 10px;
+    }
+
+    .form-row input,
+    .form-row select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 15px;
+      border: 1px solid #ccc;
+    }
+
+    .form-row.full {
+      flex-direction: column;
+    }
+
+    .submit-btn {
+      width: 100%;
+      background-color: #a60000;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+      .form-row {
+        flex-direction: column;
+      }
+
+      .header {
+        flex-direction: column;
+      }
+
+      .header img {
+        margin: 0 0 10px 0;
+      }
+
+      .header h1 {
+        font-size: 20px;
+      }
+
+      .form-container {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqTkkG-9c2jad8zMOjRkn8o8qZ-L9nnRC5JA&s" alt="GRIET Logo">
+    <h1>GOKARAJU RANGARAJU<br><span>Institute of Engineering and Technology</span></h1>
+  </div>
+
+  <div class="form-container">
+    <div class="form-title">Student Registration</div>
+    <form method="POST" action="/selfregister">
+      <div class="form-row">
+        <input name="name" type="text" placeholder="Name of the Student" required>
+        <input name="email" type="email" placeholder="Email" required>
+      </div>
+      <div class="form-row">
+        <input name="branch" type="text" placeholder="Branch" required>
+        <input name="teamsize" type="number" placeholder="Team Size" required>
+      </div>
+      <div class="form-row">
+        <input name="rollno" type="text" placeholder="Roll No" required>
+        <select name="eventname" id="eventSelect" onchange="loadSubEvents()" required>
+          <option value="">Select Event</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <input name="contact" type="tel" placeholder="Contact Number" required>
+        <select name="subevent" id="subEventSelect" required>
+          <option value="">Select Sub Event</option>
+        </select>
+      </div>
+      <button type="submit" class="submit-btn">Submit</button>
+    </form>
+  </div>
+
+  <script>
+    window.onload = function() {
+      fetch("/get-events")
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === "success") {
+            const eventSelect = document.getElementById("eventSelect");
+            data.events.forEach(event => {
+              let option = document.createElement("option");
+              option.value = event;
+              option.textContent = event;
+              eventSelect.appendChild(option);
+            });
+          }
+        });
+    };
+
+    function loadSubEvents() {
+      const selectedEvent = document.getElementById("eventSelect").value;
+      fetch(`/get-subevents/${encodeURIComponent(selectedEvent)}`)
+        .then(res => res.json())
+        .then(data => {
+          const subSelect = document.getElementById("subEventSelect");
+          subSelect.innerHTML = '<option value="">Select Sub Event</option>';
+          if (data.status === "success") {
+            data.subevents.forEach(sub => {
+              let option = document.createElement("option");
+              option.value = sub;
+              option.textContent = sub;
+              subSelect.appendChild(option);
+            });
+          }
+        });
+    }
+  </script>
+
+</body>
+</html>

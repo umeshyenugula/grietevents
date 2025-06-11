@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payment Submission - GRIET</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f6eff1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .header img {
+      height: 70px;
+      margin-bottom: 10px;
+    }
+
+    .header h1 {
+      color: #a60000;
+      text-align: center;
+      margin: 0;
+    }
+
+    .header h1 span {
+      font-size: 18px;
+      color: #333;
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      background: white;
+      padding: 20px;
+      border-radius: 20px;
+      margin-top: 20px;
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 700px;
+    }
+
+    .form-group {
+      flex: 1 1 250px;
+      margin: 10px;
+      padding: 20px;
+      background-color: #f6dcaa;
+      border-radius: 20px;
+      font-size: 20px;
+      text-align: center;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 3px;
+      border-radius: 10px;
+      border: none;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+
+    .image {
+      flex: 1 1 250px;
+      margin: 10px;
+      text-align: center;
+    }
+
+    .image img {
+      width: 100%;
+      max-width: 200px;
+      height: auto;
+      border-radius: 10px;
+    }
+
+    .submit-btn {
+      margin-top: 20px;
+      width: 100%;
+      background-color: #a60000;
+      color: white;
+      padding: 15px;
+      font-size: 16px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+      .form-group, .image {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqTkkG-9c2jad8zMOjRkn8o8qZ-L9nnRC5JA&s" alt="GRIET Logo">
+    <h1>GOKARAJU RANGARAJU<br><span>Institute of Engineering and Technology</span></h1>
+  </div>
+
+  <form method="POST" action="/submit-payment" enctype="multipart/form-data">
+    <div class="container">
+      <div class="form-group">
+        Payment Amount: ₹{{ amount }}
+      </div>
+      <div class="form-group">
+        <label for="transaction">Enter Transaction Number</label>
+        <input type="text" name="transaction" id="transaction" required>
+      </div>
+      <div class="image">
+        <img src="{{ image_url or 'https://via.placeholder.com/200x150.png?text=Payment+Proof' }}" alt="QR or Payment">
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn">Submit Application</button>
+  </form>
+
+</body>
+</html>
