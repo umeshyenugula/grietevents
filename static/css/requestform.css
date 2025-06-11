@@ -1,0 +1,93 @@
+.request-form-container {
+  max-width: 500px;
+  margin: 30px auto;
+  text-align: center;
+  background: #fdf3f2;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.griet-logo {
+  width: 100px;
+  margin-bottom: 10px;
+}
+
+.main-title {
+  font-size: 24px;
+  color: #b30000;
+  font-weight: bold;
+  margin: 0;
+}
+
+.sub-title {
+  font-size: 16px;
+  color: #444;
+  margin-bottom: 20px;
+}
+
+.big-red-btn {
+  background-color: #b30000;
+  color: white;
+  font-size: 18px;
+  padding: 15px 20px;
+  margin: 20px auto;
+  border-radius: 25px;
+  font-weight: bold;
+}
+
+.upi-input {
+  width: 100%;
+  padding: 15px;
+  margin: 10px 0;
+  font-size: 16px;
+  border-radius: 30px;
+  border: none;
+  background: #fbe4b7;
+  text-align: center;
+}
+
+.note {
+  color: red;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.subevents-container {
+  margin: 20px 0;
+}
+
+.subevents-container .form-group {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0;
+  text-align: left;
+}
+
+.subevents-container label {
+  flex: 1;
+  padding-right: 10px;
+  font-weight: bold;
+}
+
+.subevents-container input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.submit-btn {
+  background-color: #b30000;
+  color: white;
+  padding: 15px 30px;
+  font-size: 16px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.submit-btn:hover {
+  background-color: #a00000;
+}
