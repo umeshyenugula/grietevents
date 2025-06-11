@@ -13,7 +13,7 @@ from io import BytesIO
 from otpverify import send_otp
 from copy import deepcopy
 from bson import ObjectId
- from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw
 load_dotenv()  
 mongo_uri = os.getenv("MONGO_URI")
 app = Flask(__name__)
