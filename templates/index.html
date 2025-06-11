@@ -84,10 +84,52 @@
       text-decoration: underline;
       margin: 0 10px;
     }
+    .flash-container {
+  position: absolute;
+  top: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  z-index: 999;
+}
+
+.flash-message {
+  background: rgba(255, 255, 255, 0.7);
+  color: #a00000;
+  padding: 15px 25px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(160, 0, 0, 0.3);
+  font-weight: bold;
+  max-width: 600px;
+  text-align: center;
+  backdrop-filter: blur(5px);
+  border-left: 6px solid #a00000;
+}
+
+@media (max-width: 768px) {
+  .flash-message {
+    max-width: 90%;
+    font-size: 14px;
+    padding: 10px 15px;
+  }
+}
+
   </style>
 </head>
 
 <body>
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="flash-container">
+      {% for message in messages %}
+        <div class="flash-message">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
   <div class="header">
     <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqTkkG-9c2jad8zMOjRkn8o8qZ-L9nnRC5JA&s" alt="Logo">
     <h1 class="title">GRIET Events</h1>
@@ -106,6 +148,7 @@
         <a href="/register" class="btn btn-lg-custom">Register Here</a>
         <a href="/login" class="btn btn-lg-custom">Login Here</a>
         <a href="/pverify" class="btn btn-lg-custom">Verfiy Student Pass</a>
+        <a href="/student-register" class="btn btn-lg-custom">Student Registration</a>
       </div>
     </div>
   </div>
@@ -123,7 +166,15 @@
       <a href="https://www.flaticon.com/" target="_blank">Icons by Flaticon</a>
     </p>
   </div>
-
+<script>
+    setTimeout(() => {
+      const flashMessages = document.querySelectorAll('.flash-message');
+      flashMessages.forEach(msg => {
+        msg.style.opacity = '0';
+        setTimeout(() => msg.remove(), 500);
+      });
+    }, 10000);
+  </script>
   <script src="{{ url_for('static', filename='js/announcements.js') }}"></script>
 </body>
 </html>
