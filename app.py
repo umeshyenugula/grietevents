@@ -1,4 +1,5 @@
-from flask import Flask, render_template, session, request, jsonify, url_for, flash, redirect
+from flask import Flask, render_template, session, request, jsonify, url_for, flash, redirect,send_file
+import qrcode
 from pymongo import MongoClient
 from contactformsender import send_html_email
 from contactsender import send_html_email_contact
@@ -7,7 +8,11 @@ from pymongo import ReturnDocument
 from dotenv import load_dotenv
 import os
 import secrets
+import qrcode
+from io import BytesIO
 from otpverify import send_otp
+from copy import deepcopy
+from bson import ObjectId
 load_dotenv()  
 mongo_uri = os.getenv("MONGO_URI")
 app = Flask(__name__)
@@ -16,6 +21,7 @@ app.secret_key = secret_key
 client = MongoClient(mongo_uri)
 db = client["grietevents"]
 users = db["users"]
+temp=db['SelfRegistrations']
 announcements_collection = db["announcements"]
 @app.route("/")
 def home():
@@ -35,8 +41,100 @@ def get_announcements():
         return jsonify(output)
     except Exception as e:
         return jsonify({"error": str(e)})
+@app.route("/student-register")
+def student_register():
+    return render_template("selfregistrations.html")
+@app.route("/get-events", methods=["GET"])
+def get_events():
+    try:
+        events = users.distinct("eventname")
+        return jsonify({"status": "success", "events": events})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+@app.route("/get-subevents/<eventname>")
+def get_subevents(eventname):
+    try:
+        subevents_cursor = users.find({"eventname": eventname}, {"subevents": 1})
+        subevent_set = set()
+        for doc in subevents_cursor:
+            sub_str = doc.get("subevents", "")
+            subevent_set.update([s.strip() for s in sub_str.split(",") if s.strip()])
+        return jsonify({"status": "success", "subevents": list(subevent_set)})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+@app.route("/selfregister", methods=['POST'])
+def selfregister():
+    if request.method == 'POST':
+        data = {
+            'name': request.form.get("name"),
+            'branch': request.form.get("branch"),
+            'RollNo': request.form.get("rollno"),
+            'email': request.form.get("email"),
+            'eventname': request.form.get("eventname"),
+            'subevents': request.form.get("subevent"),
+            'teamsize': request.form.get("teamsize"),
+            'contact': request.form.get("contact"),
+            'date': datetime.now().strftime('%Y-%m-%d %H:%M:%S') 
+        }
+        session['data'] = data
+        return redirect(url_for('payment'))
+@app.route("/payment")
+def payment():
+    set=session.get("data")
+    if (not set):
+       return "dataLostRefilAgain"
+    formdata=session['data']
+    eventname=formdata['eventname']
+    requests=db['requests']
+    paydetails=requests.find_one({"eventname":eventname})
+    if(paydetails):
+        upi = paydetails.get("upi_id")
+        subevents = paydetails.get("subevents", {})
+        for subevent, amount in subevents.items():
+            if(subevent==formdata['subevents']):
+                price=amount
+                session['amount']=price
+        return render_template("payment.html",
+                                amount=price, 
+                               image_url=url_for('generate_qr', data=f'upi://pay?pa={upi}&mode=028&mc=0000&am={price}'))
+    else:
+        return "Organizer is Not Opened for Self Registration Contact Organizer For More details"
+def sanitize_for_mongo(data):
+    """Recursively converts ObjectIds and other non-serializables to strings."""
+    if isinstance(data, dict):
+        return {k: sanitize_for_mongo(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [sanitize_for_mongo(v) for v in data]
+    elif isinstance(data, ObjectId):
+        return str(data)
+    return data
+
+@app.route("/submit-payment", methods=["POST"])
+def submit_payment():
+    txn_number = request.form.get("transaction")
+    if txn_number:
+        raw_data = session.get('data', {})
+        clean_data = deepcopy(raw_data)
+        clean_data = sanitize_for_mongo(clean_data) 
+        clean_data['txn_number'] = txn_number
+        clean_data['amount'] = session.get('amount', 0)
+        session.pop("amount", None)
+        temp.insert_one(clean_data)
+        flash("Payment Submitted Successfully!Details Sent to Organizer for Approval,  Once Approved Your will receive confirmation mail ")
+        return redirect(url_for('home'))
+    return "Error: No Transaction Number Entered"
+@app.route("/qr/<path:data>")
+def generate_qr(data):
+    img = qrcode.make(data)
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    return send_file(buf, mimetype='image/png') 
 @app.route("/login", methods=['POST', 'GET'])
 def login():
+    username=session.get("username")
+    if(username):
+        return redirect(url_for("dashboard"))
     if request.method == 'POST':
         username = request.form.get("username")
         password = request.form.get("password")
@@ -53,9 +151,6 @@ def login():
             flash("Username does not exist.")
         return redirect(url_for("login"))
     return render_template("login.html")
-from flask import render_template, request, redirect, session, flash, url_for
-from datetime import datetime, timedelta
-
 @app.route("/recovery", methods=['GET', 'POST'])
 def recovery():
     if request.method == 'POST':
@@ -153,7 +248,7 @@ def register():
             'username': request.form.get("username"),
             'password': request.form.get("password"),
             'email': request.form.get("email"),
-            'subevents': request.form.get("subevents", 'None'),
+            'subevents': request.form.get("subevents", 'Nothing'),
             'eligibity': request.form.get("eligibity"),
             'eventname': request.form.get("eventname"),
             'eventdate': request.form.get("eventdate"),
@@ -433,6 +528,103 @@ def api_verify():
         "teamsize": participant["teamsize"],
         "amount_paid": participant["amount"]
     })
+@app.route("/requestform")
+def requestform():
+    eventname = session.get('eventname')
+    if not eventname:
+        return "Event not selected in session."
+    requests_collection = db['requests']
+    existing_entry = requests_collection.find_one({"eventname": eventname})
+    if existing_entry:
+        return "Data Already Filled and Form Created"
+    else:
+        return render_template("partials/requestform.html")
+@app.route("/approvals")
+def approvals():
+    return render_template("partials/approve.html")
+@app.route("/api/pending-approvals")
+def get_pending_approvals():
+    if 'username' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    event_name = session.get('eventname')
+    if not event_name:
+        return jsonify({"error": "Event context missing in session"}), 400
+    pending = list(db['SelfRegistrations'].find(
+        {'eventname': event_name},
+        {'_id': 0} 
+    ))
+    return jsonify(pending)
+@app.route("/approve", methods=["POST"])
+def approve_participant():
+    if 'username' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    data = request.get_json()
+    rollno = data.get("rollno")
+    txn = data.get("transaction_number")
+    user = users.find_one({'username': session['username']})
+    eventname = user['eventname']
+    eventdb = db[eventname]
+
+    p = db['SelfRegistrations'].find_one({"RollNo": rollno, "txn_number": txn})
+    if not p:
+        return jsonify({"error": "Participant not found."}), 404
+
+    p["date"] = datetime.now()
+    count = eventdb.count_documents({})
+    p["Verification"] = f'GRIET{eventname}-{count + 1}'
+    eventdb.insert_one(p)
+    db['SelfRegistrations'].delete_one({"RollNo": rollno, "txn_number": txn})
+    
+    send_html_email(
+        p['email'], p['name'], user['eventdate'], rollno,
+        p['branch'], user['eventname'] + "-" + p.get('subevent', ''),
+        p["Verification"]
+    )
+
+    return jsonify({"message": "Participant approved and moved to event database."})
+
+@app.route("/reject", methods=["POST"])
+def reject_participant():
+    if 'username' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    data = request.get_json()
+    rollno = data.get("rollno")
+    txn = data.get("transaction_number")
+
+    result = db['SelfRegistrations'].delete_one({"RollNo": rollno, "txn_number": txn})
+    if result.deleted_count == 0:
+        return jsonify({"error": "Participant not found."}), 404
+    return jsonify({"message": "Participant rejected and removed from list."})
+@app.route("/api/get-subevents")
+def fetch_subevents_api(): 
+    eventname = session.get("eventname")
+    if not eventname:
+        return jsonify({"subevents": []})
+    event_doc = db.users.find_one({"eventname": eventname})
+    subevents = []
+    if event_doc:
+        raw = event_doc.get("subevents", "")
+        if isinstance(raw, str):
+            subevents = [s.strip() for s in raw.split(",") if s.strip()]
+        elif isinstance(raw, list):
+            subevents = raw
+    return jsonify({"subevents": subevents})
+@app.route("/submit-request", methods=["POST"])
+def submit_request():
+    data = request.get_json()
+    print("Received JSON:", data)  
+    upi_id = data.get("upi_id")
+    subevents = data.get("subevents", {})
+    general_amount = data.get("general_amount", None)
+    request_entry = {
+        "eventname": session.get("eventname", "Unknown Event"),
+        "upi_id": upi_id,
+        "subevents": subevents,
+        "general_amount": general_amount,
+        "timestamp": datetime.now().isoformat()
+    }
+    db.requests.insert_one(request_entry)
+    return jsonify({"message": "Request submitted successfully"})
 @app.route("/profile")
 def profile():
     if 'username' not in session:
