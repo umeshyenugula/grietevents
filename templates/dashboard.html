@@ -11,6 +11,8 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/seetransactions.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/verification.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/requestform.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/approvals.css') }}">
   <style>
     .nav-links a.active {
       background-color: #b30000;
@@ -22,8 +24,9 @@
   <header class="main-header">
     <div class="header-content">
       <a href="{{ url_for('home') }}">
-      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="GRIET Logo" />
-    </a>
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="GRIET Logo" />
+      </a>
+
       <h1>Griet Events</h1>
     </div>
   </header>
@@ -49,10 +52,14 @@
         <a href="/update-event" data-page="/update-event">Update Event Details</a>
         <a href="/transactions" data-page="/transactions">See Transactions</a>
         <a href="/stats" data-page="/stats">See Stats</a>
+        <a href="/approvals" data-page="/approvals">Pending Approvals</a>
         <a href="/verify" data-page="/verify">Verify Participant</a>
+        <a href="/requestform" data-page="/requestform">Request Registration Form</a>
          <a href="/profile" data-page="/profile">Profile</a>
       </nav>
       <div class="profile-section">
+        <a href="/t&c" class="logout">Terms and Conditions</a><br>
+        <a href="/contact" class="logout">Contact Us</a><br>
         <a href="/logout" class="logout">Logout</a>
       </div>
     </aside>
@@ -71,84 +78,56 @@
     }, 3000);
   </script>
 
-  <script>
-  const navLinks = document.querySelectorAll('.nav-links a');
-  const mainContent = document.getElementById('main-content');
+ <script>
+const navLinks = document.querySelectorAll('.nav-links a');
+const mainContent = document.getElementById('main-content');
 
-  navLinks.forEach(link => {
-    link.addEventListener('click', async (e) => {
-      e.preventDefault();
+navLinks.forEach(link => {
+  link.addEventListener('click', async (e) => {
+    e.preventDefault();
+    navLinks.forEach(l => l.classList.remove('active'));
+    link.classList.add('active');
 
-      navLinks.forEach(l => l.classList.remove('active'));
-      link.classList.add('active');
+    const page = link.getAttribute('data-page');
+    try {
+      const response = await fetch(page);
+      if (!response.ok) throw new Error("Failed to load page.");
+      const html = await response.text();
+      mainContent.innerHTML = html;
 
-      const page = link.getAttribute('data-page');
-      try {
-        const response = await fetch(page);
-        if (!response.ok) throw new Error("Failed to load page.");
-        const html = await response.text();
-        mainContent.innerHTML = html;
-
-        if (page === "/see-participants") {
-  loadParticipants();
-} else if (page === "/transactions") {
-  loadTransactions(); 
-} else if (page === "/stats") {
-  setTimeout(() => {
-    if (typeof loadStatsCharts === "function") {
-      loadStatsCharts();
-    } else {
-      console.error("loadStatsCharts not defined.");
-    }
-  }, 100);
-} else if (page === "/verify") {
-  setTimeout(() => {
-    const verifyBtn = document.getElementById("verifyBtn");
-    if (!verifyBtn) return;
-
-    verifyBtn.addEventListener("click", function () {
-      const verificationNumber = document.getElementById("verificationInput").value.trim();
-      if (!verificationNumber) return;
-
-      fetch(`/api/verify?code=${verificationNumber}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.error) {
-            alert("Participant not found.");
-            return;
+      if (page === "/see-participants") {
+        loadParticipants();
+      } else if (page === "/transactions") {
+        loadTransactions(); 
+      } else if (page === "/stats") {
+        setTimeout(() => {
+          if (typeof loadStatsCharts === "function") {
+            loadStatsCharts();
           }
-
-          document.getElementById("participantDetails").style.display = "block";
-          document.getElementById("pName").textContent = data.name;
-          document.getElementById("pBranch").textContent = data.branch;
-          document.getElementById("pRoll").textContent = data.roll_no;
-          document.getElementById("pEvent").textContent = data.event;
-          document.getElementById("pDate").textContent = data.date;
-          document.getElementById("pTeamSize").textContent = data.teamsize;
-          document.getElementById("pAmount").textContent = `₹${data.amount_paid}`;
-        })
-        .catch(() => {
-          alert("Error fetching participant data.");
-        });
-    });
-  }, 100);
-}
-
-
-      } catch (err) {
-        mainContent.innerHTML = "<p>Error loading content.</p>";
+        }, 100);
+      } else if (page === "/verify") {
+        setTimeout(() => {
+          const verifyBtn = document.getElementById("verifyBtn");
+          if (!verifyBtn) return;
+          verifyBtn.addEventListener("click", handleVerify);
+        }, 100);
+      } else if (page === "/requestform") {
+        setTimeout(() => initRequestForm(), 100);
+      } else if (page === "/approvals") {
+        setTimeout(() => loadApprovalTable(), 100);
       }
-    });
+    } catch (err) {
+      mainContent.innerHTML = "<p>Error loading content/Unauthorised Access/.</p>";
+    }
   });
+});
 
   async function loadParticipants() {
     try {
       const res = await fetch("/api/seeparticipants");
       const data = await res.json();
-
       const tableBody = document.querySelector("#participants-table tbody");
       tableBody.innerHTML = "";
-
       data.forEach(p => {
         const row = `<tr>
           <td>${p.name}</td>
@@ -166,35 +145,34 @@
       console.error("Error loading participants:", err);
     }
   }
- async function loadTransactions() {
-  try {
-    const res = await fetch("/transactions-data");
-    const data = await res.json();
-    const tableBody = document.querySelector("#transactions-table tbody");
-    const totalAmountDiv = document.getElementById("total-amount");
-    tableBody.innerHTML = "";
-    data.participants.forEach(t => {
-      const row = `<tr>
-        <td>${t.name}</td>
-        <td>${t.roll_no}</td>
-        <td>${t.subevent}</td>
-        <td>${t.teamsize}</td>
-        <td>${t.verification_number}</td>
-        <td>${t.amount}</td>
-      </tr>`;
-      tableBody.innerHTML += row;
-    });
 
-    totalAmountDiv.textContent = `Total Amount Collected: ₹${data.total_amount}`;
-  } catch (err) {
-    console.error("Error loading transactions:", err);
+  async function loadTransactions() {
+    try {
+      const res = await fetch("/transactions-data");
+      const data = await res.json();
+      const tableBody = document.querySelector("#transactions-table tbody");
+      const totalAmountDiv = document.getElementById("total-amount");
+      tableBody.innerHTML = "";
+      data.participants.forEach(t => {
+        const row = `<tr>
+          <td>${t.name}</td>
+          <td>${t.roll_no}</td>
+          <td>${t.subevent}</td>
+          <td>${t.teamsize}</td>
+          <td>${t.verification_number}</td>
+          <td>${t.amount}</td>
+        </tr>`;
+        tableBody.innerHTML += row;
+      });
+      totalAmountDiv.textContent = `Total Amount Collected: ₹${data.total_amount}`;
+    } catch (err) {
+      console.error("Error loading transactions:", err);
+    }
   }
-}
-document.addEventListener("click", function (e) {
-  if (e.target && e.target.id === "verifyBtn") {
+
+  function handleVerify() {
     const verificationNumber = document.getElementById("verificationInput").value.trim();
     if (!verificationNumber) return;
-
     fetch(`/api/verify?code=${verificationNumber}`)
       .then(res => res.json())
       .then(data => {
@@ -202,7 +180,6 @@ document.addEventListener("click", function (e) {
           alert("Participant not found.");
           return;
         }
-
         document.getElementById("participantDetails").style.display = "block";
         document.getElementById("pName").textContent = data.name;
         document.getElementById("pBranch").textContent = data.branch;
@@ -212,13 +189,125 @@ document.addEventListener("click", function (e) {
         document.getElementById("pTeamSize").textContent = data.teamsize;
         document.getElementById("pAmount").textContent = `₹${data.amount_paid}`;
       })
-      .catch(() => {
-        alert("Error fetching participant data.");
-      });
+      .catch(() => alert("Error fetching participant data."));
   }
-});
+
+  async function initRequestForm() {
+    const container = document.getElementById("subevents-container");
+    const form = document.getElementById("payment-request-form");
+    if (!container || !form) return;
+
+    try {
+      const res = await fetch("/api/get-subevents");
+      const data = await res.json();
+      container.innerHTML = "";
+
+      if (data.subevents && data.subevents.length > 0) {
+        data.subevents.forEach(sub => {
+          const group = document.createElement("div");
+          group.className = "form-group";
+          group.innerHTML = `
+            <label for="amount_${sub}">${sub} Amount:</label>
+            <input type="number" id="amount_${sub}" name="subevents[${sub}]" min="0" required />
+          `;
+          container.appendChild(group);
+        });
+      } else {
+        container.innerHTML = `
+          <div class="form-group">
+            <label for="general_amount">Amount:</label>
+            <input type="number" id="general_amount" name="general_amount" min="0" required />
+          </div>`;
+      }
+    } catch (err) {
+      container.innerHTML = "<p>Error loading subevents.</p>";
+      console.error(err);
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const data = {};
+      formData.forEach((value, key) => {
+        if (key.startsWith("subevents[")) {
+          const subKey = key.match(/subevents\[(.+?)\]/)[1];
+          data.subevents = data.subevents || {};
+          data.subevents[subKey] = value;
+        } else {
+          data[key] = value;
+        }
+      });
+
+      const res = await fetch("/submit-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const result = await res.json();
+      alert(result.message || "Request submitted.");
+    });
+  }
+
+ async function loadApprovalTable() {
+  try {
+    const res = await fetch("/api/pending-approvals");
+    const data = await res.json();
+    const tableBody = document.querySelector("#pending-approvals-body");
+    tableBody.innerHTML = "";
+
+    data.forEach(p => {
+      const row = `
+        <tr>
+          <td>${p.name}</td>
+          <td>${p.RollNo}</td>
+          <td>${p.subevents}</td>
+          <td>${p.teamsize}</td>
+          <td>${p.amount}</td>
+          <td>${p.txn_number}</td>
+          <td>
+            <button onclick="approveParticipant('${p.RollNo}', '${p.txn_number}')">Approve</button>
+            <button onclick="rejectParticipant('${p.RollNo}', '${p.txn_number}')">Not Approve</button>
+          </td>
+        </tr>
+      `;
+      tableBody.innerHTML += row;
+    });
+  } catch (err) {
+    console.error("Error loading approval table:", err);
+  }
+}
+async function approveParticipant(rollno, transactionNumber) {
+  const res = await fetch("/approve", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ rollno, transaction_number: transactionNumber })
+  });
+  const result = await res.json();
+  if (res.ok) {
+    alert(result.message);
+    loadApprovalTable();
+  } else {
+    alert(result.error || "Approval failed.");
+  }
+}
+async function rejectParticipant(rollno, transactionNumber) {
+  const res = await fetch("/reject", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ rollno, transaction_number: transactionNumber })
+  });
+  const result = await res.json();
+  if (res.ok) {
+    alert(result.message);
+    loadApprovalTable();
+  } else {
+    alert(result.error || "Rejection failed.");
+  }
+}
 
 </script>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{{ url_for('static', filename='js/stats.js') }}"></script>
 
